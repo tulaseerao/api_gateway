@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-
+import api from '../api'
+import FinalizeAddress from './FinalizeAddress'
 import styled from 'styled-components'
 
 const Title = styled.h1.attrs({
@@ -11,12 +12,7 @@ const Wrapper = styled.div.attrs({
 })`
   margin:0 30px;
 `
-
 const Label = styled.label`
-  // font-family: Georgia, "Times New Roman", Times, serif;
-  // font-size: 18px;
-  // color: #333;
-  // height: 20px;
   width: 200px;
   margin-top: 10px;
   margin-left: 10px;
@@ -75,7 +71,8 @@ class ValidateAddress extends Component {
       region: 'US',
       security: 'Security1',
       fiveYearLossRecord: 'Loss2',
-      cleansing: ''
+      cleansing: '',
+      showFinalizeComp: false
     }
   }
 
@@ -158,16 +155,25 @@ class ValidateAddress extends Component {
       this.setState({ fiveYearLossRecord })
   }
 
-  onButtonClick = async () => {
-    const payload = this.state
-    const cleansing = 'Updated Address on button click'
+  onValidateBtnClick = async () => {
+    const payload = { "address": this.state.insuredAddress }
 
-    // await api.validateAddress(payload).then(res => {
-    //   cleansing = res
-    //   this.setState({ cleansing })
-    // })
-
-    this.setState({ cleansing })
+    await api.validateAddress(payload).then(res => {
+      let response_data = res.data
+      let cleansing = "Please enter valid address"
+      let showFinalizeComp = false
+      if (response_data.data && response_data.data.length > 0) {
+        let data = response_data.data[0]
+        if (data && data["Matches"] && data["Matches"].length > 0) {
+          let clean_address_obj = data["Matches"][0]
+          cleansing = clean_address_obj["Address"] + ', ' + clean_address_obj["Country"]
+          showFinalizeComp = true
+          // cleansing = JSON.stringify(clean_address_obj)
+        }
+      }
+      this.setState({ cleansing })
+      this.setState({ showFinalizeComp })
+    })
   }
 
   render() {
@@ -176,10 +182,8 @@ class ValidateAddress extends Component {
        <hr></hr>
         <Title>Validate Address</Title>
         <hr></hr>
-        <div class="form-group">
-          <Label>Broker: </Label>
-          <InputText type="text" value={this.state.broker} onChange={this.handleChangeInputBroker} />
-        </div>
+        <Label>Broker: </Label>
+        <InputText type="text" value={this.state.broker} onChange={this.handleChangeInputBroker} />
         <Label>Broker Name: </Label>
         <InputText type="text" value={this.state.brokerName} onChange={this.handleChangeInputBrokerName} />
         <Label>Broker Address: </Label>
@@ -237,12 +241,12 @@ class ValidateAddress extends Component {
           <option value="Loss5">Loss 5</option>
         </Select>
 
-        <Button onClick={this.onButtonClick}>Validate</Button>
-
-        <hr></hr>
-        
-        <Label>Cleansing Address: </Label>
-        <Label>{this.state.cleansing}</Label>
+        <Button onClick={this.onValidateBtnClick}>Validate</Button>
+        <hr/>
+        <div>
+          {this.state.showFinalizeComp && <FinalizeAddress data = {this.state}></FinalizeAddress>}
+        </div>
+        <hr/>
      </Wrapper>
     )
   }
