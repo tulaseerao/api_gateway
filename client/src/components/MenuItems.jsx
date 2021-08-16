@@ -14,7 +14,7 @@ const Item = styled.div.attrs({
 	className: 'navbar-nav mr-auto'
 })``
 
-class LeftMenuItems extends Component {
+class MenuItems extends Component {
 	render() {
 		return (
 			<React.Fragment>
@@ -22,10 +22,10 @@ class LeftMenuItems extends Component {
 				<Collapse>
 					<List>
 						<Item>
-							<Link to="/" className="nav-link">Upload CSV</Link>
+							<Link to="/upload" className="nav-link">Upload CSV</Link>
 						</Item>
 						<Item>
-							<Link to="/" className="nav-link">History</Link>
+							<Link to="/address/validate" className="nav-link">Validate</Link>
 						</Item>
 					</List>
 				</Collapse>
@@ -34,4 +34,4 @@ class LeftMenuItems extends Component {
 	}
 }
 
-export default LeftMenuItems
+export default MenuItems

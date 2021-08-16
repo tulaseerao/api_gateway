@@ -1,5 +1,5 @@
 import Logo from './Logo'
-import LeftMenuItems from './LeftMenuItems'
+import MenuItems from './MenuItems'
 import NavBar from './NavBar'
 
-export { Logo, LeftMenuItems, NavBar }
+export { Logo, MenuItems, NavBar }

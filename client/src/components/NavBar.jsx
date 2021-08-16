@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import styled from 'styled-components'
 
 import Logo from './Logo'
-import LeftMenuItems from './LeftMenuItems'
+import MenuItems from './MenuItems'
 
 const Container = styled.div.attrs({
   className: 'container'
@@ -20,7 +20,7 @@ class NavBar extends Component {
       <Container>
         <Nav>
           <Logo />
-          <LeftMenuItems />
+          <MenuItems />
         </Nav>
       </Container>
     )
