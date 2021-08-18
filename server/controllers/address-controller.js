@@ -14,9 +14,20 @@ validate = (req, res) => {
   if (body.adapter == 'loqate'){
     return loqate(body.address, res)
   }
-  else if(body.adapter == 'precisely')
-    return precisely(body.address, res)
-  else {
+  else if(body.adapter == 'precisely') {
+    var address = body.address;
+    if (address.line1===undefined) {
+      var add_array = address.split(',')
+      address = {
+        "line1": add_array[0],
+        "line2": '',
+        "city": add_array[1],
+        "state": add_array[2],
+        "zip": add_array[3]
+      }
+    }
+    return precisely(address, res)
+  }else {
     return res.status(400).json({
       success: false,
       error: "Invalid Parameter 'adapter' value, must be one of 'loqate' or 'precisely'"
