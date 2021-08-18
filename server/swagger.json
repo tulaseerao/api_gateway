@@ -1,0 +1,71 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "API for Address Validation",
+        "description": "API for Address Validation",
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        }
+    },
+    "host": "localhost:4000",
+    "basePath": "/api",
+    "tags": [
+        {
+            "name": "Address",
+            "description": "API for Address Validation"
+        }
+    ],
+    "schemes": [
+        "http"
+    ],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/validate": {
+            "post": {
+                "tags": [
+                    "Address"
+                ],
+                "description": "Validate Address",
+                "parameters": [
+                    {
+                        "name": "address",
+                        "in": "body",
+                        "description": "Validating Address",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "address": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "New Address has been validated"
+                    }
+                }
+            }
+    },
+    "definitions": {
+        "Address": {
+            "properties": {
+                "address": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
+}

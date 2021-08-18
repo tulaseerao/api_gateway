@@ -3,9 +3,11 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const db = require('./db')
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
 const addressRouter = require('./routes/address-router')
 const emailRouter = require('./routes/email-router')
-const apiPort = 3000
+const apiPort = 4000
 const app = express()
 
 app.use(express.urlencoded({ extended: true}))
@@ -20,6 +22,8 @@ app.get('/', (req, res) => {
 
 app.use('/api', addressRouter)
 app.use('/api', emailRouter)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 
 const server = app.listen(apiPort, () => {
     console.log('Server running on the port ' + apiPort)
