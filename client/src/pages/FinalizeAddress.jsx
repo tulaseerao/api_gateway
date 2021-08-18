@@ -19,7 +19,6 @@ const Label = styled.label`
   text-align: right;
   margin-right:15px;
   font-weight: 700;
-  float:left;
 `
 
 const TextLabel = styled.label`
@@ -37,7 +36,7 @@ class FinalizeAddress extends Component {
   constructor(props) {
     super(props)
     this.state = this.props.data
-    this.setState({ message: '' })
+    this.setState({ email_message: '' })
   }
   
   onFinalizeBtnClick = async () => {
@@ -49,7 +48,8 @@ class FinalizeAddress extends Component {
       <tr><td>Broker Address:</td><td>${this.state.brokerAddress}</td></tr>
       <tr><td>Broker Email:</td><td>${this.state.brokerEmail}</td></tr>
       <tr><td>Insured Name:</td><td>${this.state.insuredName}</td></tr>
-      <tr><td>Insured Address:</td><td>${this.state.cleansing}</td></tr>
+      <tr><td>Insured Address (Input):</td><td>${this.state.insuredAddress}</td></tr>
+      <tr><td>Insured Address (Cleansed):</td><td>${this.state.cleansedInsuredAddress}</td></tr>
       <tr><td>TIV:</td><td>${this.state.tiv}</td></tr>
       <tr><td>Limit:</td><td>${this.state.limit}</td></tr>
       <tr><td>Deductible:</td><td>${this.state.deductible}</td></tr>
@@ -61,19 +61,18 @@ class FinalizeAddress extends Component {
       </table>
       `
     const request = {
-      to: "sudharshan.talari@gmail.com",
-      from: "sudharshan.talari@gmail.com",
+      to: "abc.123@gmail.com",
+      from: "abc.123@gmail.com",
       message: payload
     }
 
     await api.sendEmail(request).then(res => {
       let data = res.data
-      let message = data && data.message ? data.message : 'Error while sending email'
-      this.setState({ message })
+      let email_message = data && data.email_message ? data.email_message : 'Error while sending email'
+      this.setState({ email_message })
     })
   }
 
-  
   render() {
     return (
       <Wrapper>
@@ -83,16 +82,14 @@ class FinalizeAddress extends Component {
         <TextLabel>{this.state.insuredAddress}</TextLabel>
         <br/>
         <Label>Cleansed Address:</Label>
-        <TextLabel>{this.state.cleansing}</TextLabel>
+        <TextLabel>{this.state.cleansedInsuredAddress}</TextLabel>
         <br/>
-        <Button onClick={this.onFinalizeBtnClick}>Finalize</Button>
         <div>
-          {this.state.message && <TextLabel>{this.state.message}</TextLabel>}
+          {this.state.email_message && <TextLabel>{this.state.email_message}</TextLabel>}
         </div>
-        
-        <hr/>
       </Wrapper>
     )
+    
   }
 }
 

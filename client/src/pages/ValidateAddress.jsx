@@ -20,6 +20,19 @@ const Label = styled.label`
   margin-right:15px;
   float:left;
 `
+const Message = styled.label`
+  color: green;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right:15px;
+`
+const ErrorMessage = styled.label`
+  color: red;
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-right:15px;
+`
+
 const InputText = styled.input.attrs({
   className: 'form-control',
 })`
@@ -52,6 +65,11 @@ const Button = styled.button.attrs({
 })`
   margin: 15px 15px 15px 5px;
 `
+const SecondaryButton = styled.button.attrs({
+  className: `btn btn-secondary`,
+})`
+  margin: 15px 15px 15px 5px;
+`
 
 class ValidateAddress extends Component {
   constructor(props) {
@@ -71,8 +89,11 @@ class ValidateAddress extends Component {
       region: 'US',
       security: 'Security1',
       fiveYearLossRecord: 'Loss2',
-      cleansing: '',
-      showFinalizeComp: false
+      cleansedInsuredAddress: '',
+      showFinalizeComp: false,
+      message: '',
+      error_message: '',
+      adapter: 'precisely'
     }
   }
 
@@ -155,25 +176,85 @@ class ValidateAddress extends Component {
       this.setState({ fiveYearLossRecord })
   }
 
+  handleChangeAdapter = async event => {
+    const adapter = event.target.value
+    this.setState({ adapter })
+}
+
   onValidateBtnClick = async () => {
-    const payload = { "address": this.state.insuredAddress }
+    var adapter = this.state.adapter
+    var address = this.state.insuredAddress
+    this.setState({ insuredAddress: address })
+
+    if(address.length === 0) {
+
+    }
+
+    if (adapter === 'precisely') {
+      var add_array = address.split(',')
+      address = {
+        "line1": add_array[0],
+        "line2": '',
+        "city": add_array[1],
+        "state": add_array[2],
+        "zip": add_array[3]
+      }
+    }
+
+    const payload = { address, adapter }
 
     await api.validateAddress(payload).then(res => {
-      let response_data = res.data
-      let cleansing = "Please enter valid address"
+      let cleansedInsuredAddress = ''
       let showFinalizeComp = false
-      if (response_data.data && response_data.data.length > 0) {
-        let data = response_data.data[0]
-        if (data && data["Matches"] && data["Matches"].length > 0) {
-          let clean_address_obj = data["Matches"][0]
-          cleansing = clean_address_obj["Address"] + ', ' + clean_address_obj["Country"]
+      let message = ''
+      let error_message = ''
+      let response_data = res.data
+      if (response_data && response_data.data) {
+        var data = response_data.data
+        cleansedInsuredAddress = data["cleansed"]
+        if(response_data["success"]) {
           showFinalizeComp = true
-          // cleansing = JSON.stringify(clean_address_obj)
+          message = data["message"]
+        } else {
+          showFinalizeComp = false
+          message = ""
+          error_message = data["message"]
         }
+      } else {
+        showFinalizeComp = false
+        message = ""
+        error_message = "No Response from Provider. Please retry with valid address"
       }
-      this.setState({ cleansing })
+      this.setState({ cleansedInsuredAddress })
       this.setState({ showFinalizeComp })
+      this.setState({ message})
+      this.setState({ error_message})
+    }).catch(error => {
+      console.error("Exception in validateAddress:", error)
+      this.setState({ error_message: "Exception in validating the Address:" + error})
     })
+  }
+
+  onSendEmailBtnClick = async (e) => {
+    const payload = `
+      Broker: \t ${this.state.broker}\n
+      Broker Name: \t ${this.state.brokerName}\n
+      Broker Address: \t ${this.state.brokerAddress}\n
+      Broker Email: \t ${this.state.brokerEmail}\n
+      Insured Name: \t ${this.state.insuredName}\n
+      Insured Address (Input): \t ${this.state.insuredAddress}\n
+      Insured Address (Cleansed): \t ${this.state.cleansedInsuredAddress}\n
+      TIV: \t ${this.state.tiv}\n
+      Limit: \t ${this.state.limit}\n
+      Deductible: \t ${this.state.deductible}\n
+      No. of Locations: \t ${this.state.noOfLocations}\n
+      Industry: \t ${this.state.industry}\n
+      Region: \t ${this.state.region}\n
+      Security: \t ${this.state.security}\n
+      5 Year Loss Record: \t ${this.state.fiveYearLossRecord}\n
+      `
+    window.location.href = `mailto:?subject=API Gateway Email&body=${encodeURIComponent(payload)}`
+    e.preventDefault()
   }
 
   render() {
@@ -241,11 +322,26 @@ class ValidateAddress extends Component {
           <option value="Loss5">Loss 5</option>
         </Select>
 
-        <Button onClick={this.onValidateBtnClick}>Validate</Button>
+        <Label>Adapter to use Address Validation: </Label>
+        <Select value={this.state.adapter} onChange={this.handleChangeAdapter}>
+          <option value="precisely">Precisely</option>
+          <option value="loqate">Loqate</option>
+        </Select>
+        <br/>
+        <div>
+          {this.state.message.length > 0 && <Message>{this.state.message}</Message>}
+        </div>
+        <div>
+          {this.state.error_message.length > 0  && <ErrorMessage>{this.state.error_message}</ErrorMessage>}
+        </div>
+        <br/>
         <hr/>
         <div>
           {this.state.showFinalizeComp && <FinalizeAddress data = {this.state}></FinalizeAddress>}
         </div>
+        <Button onClick={this.onValidateBtnClick}>Validate</Button>
+        <Button onClick={this.onSendEmailBtnClick}>Send in Email</Button>
+        <SecondaryButton disabled>Send to PAS</SecondaryButton>
         <hr/>
      </Wrapper>
     )

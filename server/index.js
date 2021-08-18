@@ -13,7 +13,7 @@ const app = express()
 app.use(express.urlencoded({ extended: true}))
 app.use(express.json())
 app.use(cors())
-
+app.use(express.static(__dirname))
 db.on('error', console.error.bind(console, 'MongoDB Connection Error:'))
 
 app.get('/', (req, res) => {
