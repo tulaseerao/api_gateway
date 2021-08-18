@@ -13,7 +13,7 @@ sendEmail = (req, res) => {
   var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'sudharshan.talari@gmail.com',
+      user: 'abc.123@gmail.com',
       pass: ''
     }
   });
