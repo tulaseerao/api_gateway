@@ -5,10 +5,7 @@ validate = (req, res) => {
   const body = req.body
 
   if(!body) {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid Request'
-    })
+    return res.status(400).json('Invalid Request')
   }
 
   if (body.adapter == 'loqate'){
@@ -36,11 +33,10 @@ validate = (req, res) => {
 }
 
 precisely = (address, res) => {
-  debugger
   try {
     const oAuth = new PreciselyAPINodeJS.OAuth();
-    oAuth.oAuthApiKey=""
-    oAuth.oAuthSecret=""
+    oAuth.oAuthApiKey= process.env.PRECISELY_API_KEY
+    oAuth.oAuthSecret= process.env.PRECISELY_API_SECRET
 
     oAuth.getOAuthCredentials().then((data) => {
       var request_body = {
@@ -75,58 +71,18 @@ precisely = (address, res) => {
     AddressValidationApi.validateMailingAddressPremium(request_body)
         .then((response) =>{
           console.log("Result:", response.body)
-          var res_body = response.body
-          let data = {
-            "cleansed": '',
-            "message": ''
-          }
-          var failed = false
-          if(res_body && res_body["Output"] && res_body["Output"].length > 0) {
-            output = res_body["Output"][0]
-            failed = output["Status"] === "F"
-            data.cleansed = output["BlockAddress"]
-            data.message = failed ? output["Status.Code"] + ": " + output["Status.Description"] + ", CouldNotValidate " + output["CouldNotValidate"] : "Address Found"
-          } else {
-            data.cleansed = JSON.stringify(address)
-            data.message = "Address Not Found"
-          }
-
-          return res.status(200).json({
-            success: !failed,
-            data: data
-          })
+          return res.status(200).json(response.body)
         }).catch( error => {
-          message = "Exception raised while validating address: " + error
-          console.error(message)
-          return res.status(400).json({
-            success: false,
-            data: {
-              cleansed: JSON.stringify(address),
-              message: message
-            }
-          })
+          console.error(error)
+          return res.status(400).json(error)
         })
     }).catch( error => {
-      message = "Exception raised while getOAuthCredentials: " + JSON.stringify(error)
-      console.error(message)
-      return res.status(400).json({
-        success: false,
-        data: {
-          cleansed: JSON.stringify(address),
-          message: message
-        }
-      })
+      console.error(error)
+      return res.status(400).json(error)
     })
-  } catch(e) {
-    message = "Exception raised: " + e
-    console.error(message)
-    return res.status(400).json({
-      success: false,
-      data: {
-        cleansed: JSON.stringify(address),
-        message: message
-      }
-    })
+  } catch(error) {
+    console.error(error)
+    return res.status(400).json(error)
   }
 }
 
@@ -169,39 +125,18 @@ loqate = (address, res) => {
       let json = {}
       try {
         json = JSON.parse(lbuffer.toString())
-        let first_record = json[0]
-        let data = {
-          "cleansed": '',
-          "message": ''
-        }
-        let success = true
-        if (first_record && first_record["Matches"] && first_record["Matches"].length > 0) {
-          console.log("first Record: ", first_record)
-          data.cleansed = first_record["Matches"][0]["Address"] + ', ' + first_record["Matches"][0]["Country"]          
-          data.message = "Address Found"
-        } else {
-          success = false
-          data.cleansed = ""
-          data.message = "Address Not Found"
-        }
-        console.log(data)
-        return res.status(200).json({success, data})
-      } catch(e) {
-        console.error(e)
-        return res.status(400).json({
-          success: false,
-          error: e
-        })
+        console.log(json)
+        return res.status(200).json(json)
+      } catch(error) {
+        console.error(error)
+        return res.status(400).json(error)
       }
     })
   })
 
   request.on('error', error => {
     console.error(error)
-    return res.status(400).json({
-      success: false,
-      error: error
-    })
+    return res.status(400).json(error)
   })
 
   request.write(data)

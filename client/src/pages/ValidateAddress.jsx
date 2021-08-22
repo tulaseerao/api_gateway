@@ -182,6 +182,7 @@ class ValidateAddress extends Component {
 }
 
   onValidateBtnClick = async () => {
+    this.setState({ showFinalizeComp: false })
     var adapter = this.state.adapter
     var address = this.state.insuredAddress
     this.setState({ insuredAddress: address })
@@ -205,28 +206,41 @@ class ValidateAddress extends Component {
 
     await api.validateAddress(payload).then(res => {
       let cleansedInsuredAddress = ''
-      let showFinalizeComp = false
       let message = ''
       let error_message = ''
-      let response_data = res.data
-      if (response_data && response_data.data) {
-        var data = response_data.data
-        cleansedInsuredAddress = data["cleansed"]
-        if(response_data["success"]) {
-          showFinalizeComp = true
-          message = data["message"]
+      let data = res.data
+      let success = false
+      if (data) {
+        if (adapter === 'precisely') {
+          if(data["Output"] && data["Output"].length > 0) {
+            let output = data["Output"][0]
+            success = !(output["Status"] === "F")
+            cleansedInsuredAddress = output["BlockAddress"]
+            message = success ? "Address Found" : output["Status.Code"] + ": " + output["Status.Description"] + ", CouldNotValidate " + output["CouldNotValidate"]
+          }
         } else {
-          showFinalizeComp = false
+          let first_record = data[0]
+          if (first_record && first_record["Matches"] && first_record["Matches"].length > 0) {
+            console.log("first Record: ", first_record)
+            cleansedInsuredAddress = first_record["Matches"][0]["Address"] + ', ' + first_record["Matches"][0]["Country"]          
+            message = "Address Found"
+            success = true
+          }
+        }
+        if(success) {
+          error_message = ""
+        } else {
+          cleansedInsuredAddress = ""
+          error_message = "Address Not Found"
           message = ""
-          error_message = data["message"]
         }
       } else {
-        showFinalizeComp = false
+        success = false
         message = ""
         error_message = "No Response from Provider. Please retry with valid address"
       }
       this.setState({ cleansedInsuredAddress })
-      this.setState({ showFinalizeComp })
+      this.setState({ showFinalizeComp: success })
       this.setState({ message})
       this.setState({ error_message})
     }).catch(error => {
@@ -255,6 +269,24 @@ class ValidateAddress extends Component {
       `
     window.location.href = `mailto:?subject=API Gateway Email&body=${encodeURIComponent(payload)}`
     e.preventDefault()
+  }
+
+  onSendToPASBtnClick = async (e) => {
+    var encoded_name = encodeURIComponent(this.state.insuredName)
+    await api.sendToPAS(encoded_name).then(res => {
+      let error_message = ""
+      let message = ""
+      if(res && res.results) {
+        message = 'Send to PAS and received results as: ' + JSON.stringify(res.results)
+      } else {
+        error_message = "Send to PAS but received empty results"
+      }
+      this.setState({ message})
+      this.setState({ error_message})
+    }).catch(error => {
+      console.error("Exception:", error)
+      this.setState({ error_message: "Exception:" + error})
+    })
   }
 
   render() {
@@ -341,7 +373,7 @@ class ValidateAddress extends Component {
         </div>
         <Button onClick={this.onValidateBtnClick}>Validate</Button>
         <Button onClick={this.onSendEmailBtnClick}>Send in Email</Button>
-        <SecondaryButton disabled>Send to PAS</SecondaryButton>
+        <Button onClick={this.onSendToPASBtnClick}>Send to PAS</Button>
         <hr/>
      </Wrapper>
     )

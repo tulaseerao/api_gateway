@@ -1,71 +1,116 @@
 {
-    "swagger": "2.0",
-    "info": {
-        "version": "1.0.0",
-        "title": "API for Address Validation",
-        "description": "API for Address Validation",
-        "license": {
-            "name": "MIT",
-            "url": "https://opensource.org/licenses/MIT"
-        }
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "API for Address Validation",
+    "description": "API for Address Validation",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "host": "localhost:4000",
+  "basePath": "/api",
+  "tags": [
+    {
+      "name": "Address",
+      "description": "API for Address Validation"
     },
-    "host": "localhost:4000",
-    "basePath": "/api",
-    "tags": [
-        {
-            "name": "Address",
-            "description": "API for Address Validation"
-        }
-    ],
-    "schemes": [
-        "http"
-    ],
-    "consumes": [
-        "application/json"
-    ],
-    "produces": [
-        "application/json"
-    ],
-    "paths": {
-        "/validate": {
-            "post": {
-                "tags": [
-                    "Address"
-                ],
-                "description": "Validate Address",
-                "parameters": [
-                    {
-                        "name": "address",
-                        "in": "body",
-                        "description": "Validating Address",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "address": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "New Address has been validated"
-                    }
+    {
+        "name": "Screening",
+        "description": "API for Insured Name screening"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/validate": {
+      "post": {
+        "tags": [
+          "Address"
+        ],
+        "description": "Validate Address",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Validating Address with adapter (precisely or loqate)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "address": {
+                  "type": "string"
+                },
+                "adapter": {
+                  "type": "string"
                 }
+              }
             }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "New Address has been validated"
+          }
+        }
+      }
+    },
+    "/screening?name={name}": {
+      "get": {
+        "tags": [
+          "Screening"
+        ],
+        "description": "Screen Insured Name",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "description": "Screening Insured Name",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Insured Name has been screened",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Exception"
+          }
+        }
+      }
     },
     "definitions": {
-        "Address": {
-            "properties": {
-                "address": {
-                    "type": "string"
-                }
-            }
+      "Address": {
+        "properties": {
+          "address": {
+            "type": "string"
+          }
         }
+      }
     }
-}
+  }
 }

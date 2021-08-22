@@ -6,6 +6,7 @@ const db = require('./db')
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const addressRouter = require('./routes/address-router')
+const screeningRouter = require('./routes/screening-router')
 const emailRouter = require('./routes/email-router')
 const apiPort = 4000
 const app = express()
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 })
 
 app.use('/api', addressRouter)
+app.use('/api', screeningRouter)
 app.use('/api', emailRouter)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
